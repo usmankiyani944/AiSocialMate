@@ -18,6 +18,7 @@ const formSchema = z.object({
   tone: z.string().default("friendly"),
   brandName: z.string().optional(),
   brandContext: z.string().optional(),
+  brandUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   aiProvider: z.string().default("openai"),
   model: z.string().default("gpt-4o"),
   creativity: z.array(z.number()).default([0.7]),
@@ -35,6 +36,7 @@ export default function ReplyGeneratorForm() {
       tone: "friendly",
       brandName: "",
       brandContext: "",
+      brandUrl: "",
       aiProvider: "openai",
       model: "gpt-4o",
       creativity: [0.7],
@@ -162,6 +164,25 @@ export default function ReplyGeneratorForm() {
                       {...field} 
                     />
                   </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="brandUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Brand URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="https://yourbrand.com" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Optional: Your brand website to subtly reference in replies
+                  </FormDescription>
                 </FormItem>
               )}
             />

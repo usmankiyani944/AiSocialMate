@@ -1,8 +1,9 @@
 import { 
-  users, alerts, searchResults, generatedReplies,
+  users, alerts, searchResults, generatedReplies, faqs,
   type User, type InsertUser, type Alert, type InsertAlert,
   type SearchResult, type InsertSearchResult,
-  type GeneratedReply, type InsertGeneratedReply
+  type GeneratedReply, type InsertGeneratedReply,
+  type Faq, type InsertFaq
 } from "@shared/schema";
 
 export interface IStorage {
@@ -82,6 +83,8 @@ export class MemStorage implements IStorage {
       minOpportunityScore: insertAlert.minOpportunityScore ?? "medium",
       includeNegativeSentiment: insertAlert.includeNegativeSentiment ?? false,
       emailNotifications: insertAlert.emailNotifications ?? true,
+      email: insertAlert.email ?? null,
+      reportUrl: insertAlert.reportUrl ?? null,
       webhookUrl: insertAlert.webhookUrl ?? null,
       isActive: true,
       id,
@@ -132,9 +135,11 @@ export class MemStorage implements IStorage {
       ...insertReply,
       brandName: insertReply.brandName ?? null,
       brandContext: insertReply.brandContext ?? null,
+      brandUrl: insertReply.brandUrl ?? null,
       creativity: insertReply.creativity ?? "0.7",
       aiProvider: insertReply.aiProvider ?? "openai",
       model: insertReply.model ?? "gpt-4o",
+      feedback: insertReply.feedback ?? null,
       id,
       createdAt: new Date()
     };

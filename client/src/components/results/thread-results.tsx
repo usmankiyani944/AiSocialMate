@@ -49,7 +49,7 @@ export default function ThreadResults({ results, totalResults, query }: ThreadRe
                 )}
                 
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center flex-wrap gap-4">
                     {thread.author && <span>by {thread.author}</span>}
                     {thread.replies && (
                       <span className="flex items-center space-x-1">
@@ -63,6 +63,11 @@ export default function ThreadResults({ results, totalResults, query }: ThreadRe
                         <span>{thread.upvotes}</span>
                       </span>
                     )}
+                    {thread.views && <span>👁 {thread.views}</span>}
+                    {thread.likes && <span>❤️ {thread.likes}</span>}
+                    {thread.shares && <span>🔄 {thread.shares}</span>}
+                    {thread.retweets && <span>🔁 {thread.retweets}</span>}
+                    {thread.reshares && <span>📤 {thread.reshares}</span>}
                   </div>
                   {thread.timestamp && <span>{thread.timestamp}</span>}
                 </div>

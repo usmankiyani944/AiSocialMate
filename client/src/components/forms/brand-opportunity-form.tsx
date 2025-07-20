@@ -3,117 +3,98 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Settings } from "lucide-react";
+import { useSearch } from "../../hooks/use-search";
 
 const formSchema = z.object({
-  searchType: z.string().default("brand-opportunities"),
   brandName: z.string().min(1, "Brand name is required"),
   competitorName: z.string().min(1, "Competitor name is required"),
   keywords: z.string().optional(),
   excludeKeywords: z.string().optional(),
   platforms: z.array(z.string()).min(1, "Select at least one platform"),
-  timeRange: z.string().default("last-30-days"),
+  timeRange: z.string().default("any"),
   sentiment: z.string().default("all"),
-  minEngagement: z.string().optional(),
-  maxResults: z.string().default("10"),
-  language: z.string().default("english"),
-  includeNegative: z.boolean().default(false),
-  serperApiKey: z.string().optional(),
+  minEngagement: z.string().default("0"),
+  maxResults: z.number().default(10),
+  searchDepth: z.string().default("standard"),
+  language: z.string().default("en"),
 });
 
+const platformOptions = [
+  { id: "Reddit", label: "Reddit", checked: true },
+  { id: "Quora", label: "Quora", checked: true },
+  { id: "Facebook", label: "Facebook", checked: false },
+  { id: "Twitter/X", label: "Twitter/X", checked: false },
+  { id: "LinkedIn", label: "LinkedIn", checked: false },
+  { id: "YouTube", label: "YouTube", checked: false },
+];
+
 interface BrandOpportunityFormProps {
-  onSearch: (data: any) => void;
+  onSubmit: (data: any) => void;
   isLoading: boolean;
-  activeTab: string;
 }
 
-export default function BrandOpportunityForm({ onSearch, isLoading, activeTab }: BrandOpportunityFormProps) {
-  const [formData, setFormData] = useState<any>({});
-
+export default function BrandOpportunityForm({ onSubmit, isLoading }: BrandOpportunityFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      searchType: "brand-opportunities",
       brandName: "",
       competitorName: "",
       keywords: "",
       excludeKeywords: "",
       platforms: ["Reddit", "Quora"],
-      timeRange: "last-30-days",
+      timeRange: "any",
       sentiment: "all",
-      minEngagement: "",
-      maxResults: "10",
-      language: "english",
-      includeNegative: false,
-      serperApiKey: "",
+      minEngagement: "0",
+      maxResults: 10,
+      searchDepth: "standard",
+      language: "en",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const searchData = { ...formData, ...values };
-    setFormData(searchData);
-    onSearch(searchData);
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    onSubmit(values);
   };
-
-  const handleFormChange = (field: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [field]: value }));
-  };
-
-  const platforms = [
-    { id: "Reddit", label: "Reddit" },
-    { id: "Quora", label: "Quora" },
-    { id: "Facebook", label: "Facebook" },
-    { id: "Twitter", label: "Twitter/X" },
-    { id: "LinkedIn", label: "LinkedIn" },
-    { id: "YouTube", label: "YouTube" },
-  ];
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardHeader>
+        <CardTitle>Brand Opportunity Search</CardTitle>
+        <p className="text-sm text-gray-600">
+          Find mentions of competitors without your brand to discover new opportunities
+        </p>
+      </CardHeader>
+      <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {activeTab === "basic" && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="searchType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Search Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="brand-opportunities">Brand Opportunities</SelectItem>
-                          <SelectItem value="competitor-analysis">Competitor Analysis</SelectItem>
-                          <SelectItem value="market-research">Market Research</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Find mentions of competitors without your brand
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <Tabs defaultValue="basic" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="basic">Basic</TabsTrigger>
+                <TabsTrigger value="platforms">Platforms</TabsTrigger>
+                <TabsTrigger value="filters">Filters</TabsTrigger>
+                <TabsTrigger value="advanced">Advanced</TabsTrigger>
+              </TabsList>
 
+              <TabsContent value="basic" className="space-y-4">
                 <FormField
                   control={form.control}
                   name="brandName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Your Brand Name *</FormLabel>
+                      <FormLabel>Your Brand Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your company name" {...field} />
+                        <Input placeholder="Your Brand" {...field} />
                       </FormControl>
+                      <FormDescription>
+                        Your brand name to exclude from search results
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -124,10 +105,13 @@ export default function BrandOpportunityForm({ onSearch, isLoading, activeTab }:
                   name="competitorName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Competitor Name *</FormLabel>
+                      <FormLabel>Competitor Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Main competitor" {...field} />
+                        <Input placeholder="Competitor Brand" {...field} />
                       </FormControl>
+                      <FormDescription>
+                        Competitor name to search for mentions
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -140,43 +124,30 @@ export default function BrandOpportunityForm({ onSearch, isLoading, activeTab }:
                     <FormItem>
                       <FormLabel>Keywords (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="software, tools, alternative" {...field} />
+                        <Input placeholder="marketing tools, automation, CRM" {...field} />
                       </FormControl>
                       <FormDescription>
-                        Comma-separated keywords to include
+                        Additional keywords to refine the search
                       </FormDescription>
                     </FormItem>
                   )}
                 />
+              </TabsContent>
 
-                <FormField
-                  control={form.control}
-                  name="excludeKeywords"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Exclude Keywords</FormLabel>
-                      <FormControl>
-                        <Input placeholder="spam, affiliate, promotion" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Comma-separated keywords to exclude
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
-
-            {activeTab === "platforms" && (
-              <div>
+              <TabsContent value="platforms" className="space-y-4">
                 <FormField
                   control={form.control}
                   name="platforms"
                   render={() => (
                     <FormItem>
-                      <FormLabel className="text-lg font-medium">Select Platforms to Monitor</FormLabel>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                        {platforms.map((platform) => (
+                      <div className="mb-4">
+                        <FormLabel className="text-base">Select Platforms to Monitor</FormLabel>
+                        <FormDescription>
+                          Choose platforms where you want to discover opportunities
+                        </FormDescription>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        {platformOptions.map((platform) => (
                           <FormField
                             key={platform.id}
                             control={form.control}
@@ -185,26 +156,27 @@ export default function BrandOpportunityForm({ onSearch, isLoading, activeTab }:
                               return (
                                 <FormItem
                                   key={platform.id}
-                                  className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                                  className="flex flex-row items-start space-x-3 space-y-0"
                                 >
                                   <FormControl>
                                     <Checkbox
                                       checked={field.value?.includes(platform.id)}
                                       onCheckedChange={(checked) => {
-                                        const currentValue = field.value || [];
-                                        const newValue = checked
-                                          ? [...currentValue, platform.id]
-                                          : currentValue.filter((value) => value !== platform.id);
-                                        field.onChange(newValue);
-                                        handleFormChange('platforms', newValue);
+                                        return checked
+                                          ? field.onChange([...field.value, platform.id])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (value) => value !== platform.id
+                                              )
+                                            )
                                       }}
                                     />
                                   </FormControl>
-                                  <FormLabel className="font-medium cursor-pointer">
+                                  <FormLabel className="text-sm font-normal">
                                     {platform.label}
                                   </FormLabel>
                                 </FormItem>
-                              );
+                              )
                             }}
                           />
                         ))}
@@ -213,14 +185,30 @@ export default function BrandOpportunityForm({ onSearch, isLoading, activeTab }:
                     </FormItem>
                   )}
                 />
-              </div>
-            )}
+              </TabsContent>
 
-            {activeTab === "filters" && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium text-gray-900">Search Filters</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TabsContent value="filters" className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="excludeKeywords"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Exclude Keywords</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="spam, promotional, advertisement"
+                          className="min-h-[80px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Keywords to exclude from search results (comma-separated)
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="timeRange"
@@ -234,22 +222,23 @@ export default function BrandOpportunityForm({ onSearch, isLoading, activeTab }:
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="last-24-hours">Last 24 hours</SelectItem>
-                            <SelectItem value="last-7-days">Last 7 days</SelectItem>
-                            <SelectItem value="last-30-days">Last 30 days</SelectItem>
-                            <SelectItem value="last-90-days">Last 90 days</SelectItem>
+                            <SelectItem value="any">Any Time</SelectItem>
+                            <SelectItem value="day">Past Day</SelectItem>
+                            <SelectItem value="week">Past Week</SelectItem>
+                            <SelectItem value="month">Past Month</SelectItem>
+                            <SelectItem value="year">Past Year</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="sentiment"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Sentiment Filter</FormLabel>
+                        <FormLabel>Sentiment</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -257,79 +246,45 @@ export default function BrandOpportunityForm({ onSearch, isLoading, activeTab }:
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="all">All sentiments</SelectItem>
-                            <SelectItem value="positive">Positive only</SelectItem>
-                            <SelectItem value="neutral">Neutral only</SelectItem>
-                            <SelectItem value="negative">Negative only</SelectItem>
+                            <SelectItem value="all">All Sentiments</SelectItem>
+                            <SelectItem value="positive">Positive</SelectItem>
+                            <SelectItem value="negative">Negative</SelectItem>
+                            <SelectItem value="neutral">Neutral</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
                     )}
                   />
                 </div>
+              </TabsContent>
 
+              <TabsContent value="advanced" className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="minEngagement"
+                  name="searchDepth"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Minimum Engagement</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="10" {...field} />
-                      </FormControl>
+                      <FormLabel>Search Depth</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="quick">Quick (basic results)</SelectItem>
+                          <SelectItem value="standard">Standard (recommended)</SelectItem>
+                          <SelectItem value="deep">Deep (comprehensive)</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormDescription>
-                        Minimum likes, votes, or reactions
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-
-            {activeTab === "advanced" && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium text-gray-900">Advanced Settings</h3>
-                
-                <FormField
-                  control={form.control}
-                  name="serperApiKey"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Serper API Key (Optional)</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter your custom Serper.dev API key" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Leave empty to use default API key
+                        Choose search depth for result quality vs speed
                       </FormDescription>
                     </FormItem>
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="maxResults"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Max Results</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="10">10 results</SelectItem>
-                            <SelectItem value="25">25 results</SelectItem>
-                            <SelectItem value="50">50 results</SelectItem>
-                            <SelectItem value="100">100 results</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                  
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="language"
@@ -343,46 +298,52 @@ export default function BrandOpportunityForm({ onSearch, isLoading, activeTab }:
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="english">English</SelectItem>
-                            <SelectItem value="spanish">Spanish</SelectItem>
-                            <SelectItem value="french">French</SelectItem>
-                            <SelectItem value="german">German</SelectItem>
-                            <SelectItem value="all">All languages</SelectItem>
+                            <SelectItem value="en">All Languages</SelectItem>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="es">Spanish</SelectItem>
+                            <SelectItem value="fr">French</SelectItem>
+                            <SelectItem value="de">German</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="maxResults"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Max Results</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="5" 
+                            max="100" 
+                            {...field}
+                            onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </div>
+              </TabsContent>
+            </Tabs>
 
-                <FormField
-                  control={form.control}
-                  name="includeNegative"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          Include negative sentiment posts
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading} className="flex items-center space-x-2">
-                <Search className="h-4 w-4" />
-                <span>{isLoading ? 'Searching...' : 'Find Opportunities'}</span>
-              </Button>
-            </div>
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? (
+                <>
+                  <Settings className="mr-2 h-4 w-4 animate-spin" />
+                  Searching...
+                </>
+              ) : (
+                <>
+                  <Search className="mr-2 h-4 w-4" />
+                  Find Opportunities
+                </>
+              )}
+            </Button>
           </form>
         </Form>
       </CardContent>

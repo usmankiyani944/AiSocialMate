@@ -18,6 +18,8 @@ export const alerts = pgTable("alerts", {
   maxResults: integer("max_results").default(10),
   includeNegativeSentiment: boolean("include_negative_sentiment").default(false),
   emailNotifications: boolean("email_notifications").default(true),
+  email: text("email"),
+  reportUrl: text("report_url"),
   webhookUrl: text("webhook_url"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
@@ -40,10 +42,23 @@ export const generatedReplies = pgTable("generated_replies", {
   tone: text("tone").notNull(),
   brandName: text("brand_name"),
   brandContext: text("brand_context"),
+  brandUrl: text("brand_url"),
   generatedText: text("generated_text").notNull(),
   creativity: text("creativity").default("0.7"),
   aiProvider: text("ai_provider").default("openai"),
   model: text("model").default("gpt-4o"),
+  feedback: text("feedback"), // 'like' | 'dislike' | null
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const faqs = pgTable("faqs", {
+  id: serial("id").primaryKey(),
+  keyword: text("keyword").notNull(),
+  brandName: text("brand_name").notNull(),
+  brandWebsite: text("brand_website"),
+  brandDescription: text("brand_description"),
+  platforms: text("platforms").array().notNull(),
+  questions: jsonb("questions").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -68,6 +83,11 @@ export const insertGeneratedReplySchema = createInsertSchema(generatedReplies).o
   createdAt: true,
 });
 
+export const insertFaqSchema = createInsertSchema(faqs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Alert = typeof alerts.$inferSelect;
@@ -76,3 +96,5 @@ export type SearchResult = typeof searchResults.$inferSelect;
 export type InsertSearchResult = z.infer<typeof insertSearchResultSchema>;
 export type GeneratedReply = typeof generatedReplies.$inferSelect;
 export type InsertGeneratedReply = z.infer<typeof insertGeneratedReplySchema>;
+export type Faq = typeof faqs.$inferSelect;
+export type InsertFaq = z.infer<typeof insertFaqSchema>;
