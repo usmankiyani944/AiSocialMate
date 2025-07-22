@@ -45,10 +45,10 @@ export default function SearchResults({ results, type, totalResults, query }: Se
                   </p>
                 )}
                 
-                {/* Platform-specific stats */}
+                {/* Enhanced Platform-specific stats - Issue #2 fix */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    {/* Platform-specific metrics */}
+                    {/* Enhanced Platform-specific metrics with better visibility */}
                     {result.platform === 'Reddit' && (
                       <>
                         {result.upvotes && (

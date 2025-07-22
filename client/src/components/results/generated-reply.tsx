@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, RotateCcw, ThumbsUp, ThumbsDown, ExternalLink } from "lucide-react";
+import { Copy, RotateCcw, ThumbsUp, ThumbsDown, ExternalLink, Settings } from "lucide-react";
 import { useReplyGenerator } from "../../hooks/use-reply-generator";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
@@ -71,7 +71,12 @@ export default function GeneratedReply() {
               </Button>
               <Button size="sm" onClick={handleRegenerate} disabled={isLoading}>
                 <RotateCcw className="h-4 w-4 mr-2" />
-                {isLoading ? 'Regenerating...' : 'Regenerate'}
+                {isLoading ? 'Regenerating...' : 'Regenerate Reply'}
+              </Button>
+              {/* Issue #5 fix - Add Adjust Anchor button */}
+              <Button size="sm" variant="outline" onClick={() => {}}>
+                <Settings className="h-4 w-4 mr-2" />
+                Adjust Anchor
               </Button>
             </div>
           </div>

@@ -30,7 +30,9 @@ const platformOptions = [
 
 export default function FAQGeneratorForm() {
   const [faqs, setFaqs] = useState<any[]>([]);
+  const [topQuestions, setTopQuestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'questions' | 'answers'>('questions');
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -44,17 +46,64 @@ export default function FAQGeneratorForm() {
     },
   });
 
+  // Issue #6 fix - Two-step FAQ generation process
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (currentStep === 'questions') {
+      setIsLoading(true);
+      try {
+        // Step 1: Extract top questions
+        const response = await fetch('/api/extract-questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(values),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to extract questions');
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+          setTopQuestions(data.questions);
+          setCurrentStep('answers');
+          toast({
+            title: "Questions Extracted",
+            description: `Found ${data.questions.length} top questions! Review and generate answers.`,
+          });
+        } else {
+          throw new Error(data.message || 'Question extraction failed');
+        }
+      } catch (error) {
+        console.error('Question extraction error:', error);
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to extract questions",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const generateAnswers = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/generate-faq', {
+      // Step 2: Generate answers for selected questions
+      const response = await fetch('/api/generate-faq-answers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          questions: topQuestions,
+          brandName: form.getValues('brandName'),
+          brandWebsite: form.getValues('brandWebsite'),
+          brandDescription: form.getValues('brandDescription'),
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate FAQ');
+        throw new Error('Failed to generate FAQ answers');
       }
 
       const data = await response.json();
@@ -62,17 +111,17 @@ export default function FAQGeneratorForm() {
       if (data.success) {
         setFaqs(data.faqs);
         toast({
-          title: "Success",
-          description: `Generated ${data.faqs.length} FAQ items!`,
+          title: "FAQ Generated",
+          description: `Generated ${data.faqs.length} complete FAQ items!`,
         });
       } else {
-        throw new Error(data.message || 'FAQ generation failed');
+        throw new Error(data.message || 'Answer generation failed');
       }
     } catch (error) {
-      console.error('FAQ generation error:', error);
+      console.error('FAQ answer generation error:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to generate FAQ",
+        description: error instanceof Error ? error.message : "Failed to generate FAQ answers",
         variant: "destructive",
       });
     } finally {
@@ -221,23 +270,67 @@ export default function FAQGeneratorForm() {
                 )}
               />
 
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating FAQ...
-                  </>
-                ) : (
-                  <>
-                    <HelpCircle className="mr-2 h-4 w-4" />
-                    Generate FAQ
-                  </>
-                )}
-              </Button>
+              {currentStep === 'questions' ? (
+                <Button type="submit" disabled={isLoading} className="w-full">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Extracting Questions...
+                    </>
+                  ) : (
+                    <>
+                      <HelpCircle className="mr-2 h-4 w-4" />
+                      Find Top Questions
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <div className="flex items-center space-x-4 w-full">
+                  <Button type="button" variant="outline" onClick={() => setCurrentStep('questions')}>
+                    Back to Questions
+                  </Button>
+                  <Button type="button" onClick={generateAnswers} disabled={isLoading} className="flex-1">
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating Answers...
+                      </>
+                    ) : (
+                      <>
+                        <HelpCircle className="mr-2 h-4 w-4" />
+                        Generate FAQ Answers
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
             </form>
           </Form>
         </CardContent>
       </Card>
+
+      {/* Show extracted questions for review - Issue #6 fix */}
+      {topQuestions.length > 0 && currentStep === 'answers' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Extracted Questions ({topQuestions.length} found)</CardTitle>
+            <p className="text-sm text-gray-600">
+              Review these top questions before generating answers
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {topQuestions.map((question, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-3">
+                  <p className="text-sm font-medium">
+                    {index + 1}. {question}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {faqs.length > 0 && (
         <Card>

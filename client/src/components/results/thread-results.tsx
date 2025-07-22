@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, MessageCircle, ArrowUp } from "lucide-react";
+import { ExternalLink, MessageCircle, ArrowUp, Wand2 } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface ThreadResultsProps {
   results: any[];
@@ -10,14 +11,15 @@ interface ThreadResultsProps {
 }
 
 export default function ThreadResults({ results, totalResults, query }: ThreadResultsProps) {
+  const [, setLocation] = useLocation();
+  
   if (!results || results.length === 0) {
     return null;
   }
 
-  const handleUseForReply = (threadUrl: string) => {
-    // This would navigate to the AI reply generator and pre-fill the URL
-    // For now, we'll just copy the URL to clipboard
-    navigator.clipboard.writeText(threadUrl);
+  const handleGenerateReply = (threadUrl: string, threadTitle: string) => {
+    // Issue #3 & #4 fix - Navigate to AI Reply Generator with pre-filled URL
+    setLocation(`/ai-replies?threadUrl=${encodeURIComponent(threadUrl)}&title=${encodeURIComponent(threadTitle)}`);
   };
 
   return (
@@ -87,9 +89,11 @@ export default function ThreadResults({ results, totalResults, query }: ThreadRe
                   
                   <Button 
                     size="sm"
-                    onClick={() => handleUseForReply(thread.url)}
+                    onClick={() => handleGenerateReply(thread.url, thread.title)}
+                    className="flex items-center space-x-1"
                   >
-                    Generate Reply
+                    <Wand2 className="h-3 w-3" />
+                    <span>Generate Reply</span>
                   </Button>
                 </div>
               </div>
