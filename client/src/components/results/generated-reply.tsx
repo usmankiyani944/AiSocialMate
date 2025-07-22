@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, RotateCcw } from "lucide-react";
+import { Copy, RotateCcw, ThumbsUp, ThumbsDown, ExternalLink } from "lucide-react";
 import { useReplyGenerator } from "../../hooks/use-reply-generator";
 import { useToast } from "@/hooks/use-toast";
+import { api } from "@/lib/api";
 
 export default function GeneratedReply() {
   const { lastReply, regenerateLastReply, isLoading } = useReplyGenerator();
   const { toast } = useToast();
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
   if (!lastReply) {
     return null;
@@ -32,6 +36,28 @@ export default function GeneratedReply() {
     regenerateLastReply();
   };
 
+  const handleFeedback = async (feedbackType: 'like' | 'dislike') => {
+    if (!lastReply?.id) return;
+    
+    setIsSubmittingFeedback(true);
+    try {
+      await api.submitReplyFeedback(lastReply.id, feedbackType);
+      setFeedback(feedbackType);
+      toast({
+        title: "Feedback submitted",
+        description: `Thanks for your ${feedbackType === 'like' ? 'positive' : 'constructive'} feedback!`
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit feedback",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
   return (
     <div className="mt-8">
       <Card>
@@ -55,20 +81,49 @@ export default function GeneratedReply() {
             {lastReply.text}
           </div>
           
+          {/* Smart Feedback Integration */}
+          <div className="mt-4 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant={feedback === 'like' ? 'default' : 'outline'}
+                size="sm" 
+                onClick={() => handleFeedback('like')}
+                disabled={isSubmittingFeedback}
+              >
+                <ThumbsUp className="h-4 w-4 mr-1" />
+                Like
+              </Button>
+              <Button 
+                variant={feedback === 'dislike' ? 'destructive' : 'outline'}
+                size="sm" 
+                onClick={() => handleFeedback('dislike')}
+                disabled={isSubmittingFeedback}
+              >
+                <ThumbsDown className="h-4 w-4 mr-1" />
+                Dislike
+              </Button>
+            </div>
+            
+            {lastReply.metadata?.threadUrl && (
+              <Button variant="ghost" size="sm" asChild>
+                <a 
+                  href={lastReply.metadata.threadUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center"
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  Original Thread
+                </a>
+              </Button>
+            )}
+          </div>
+          
           {lastReply.metadata && (
             <div className="mt-4 text-sm text-gray-500">
               <p>Reply type: {lastReply.metadata.replyType} | Tone: {lastReply.metadata.tone}</p>
-              {lastReply.metadata.threadUrl && (
-                <p>
-                  Thread: <a 
-                    href={lastReply.metadata.threadUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    {lastReply.metadata.threadUrl}
-                  </a>
-                </p>
+              {lastReply.metadata.brandName && (
+                <p>Brand: {lastReply.metadata.brandName}</p>
               )}
             </div>
           )}

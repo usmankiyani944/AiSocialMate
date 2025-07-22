@@ -8,9 +8,10 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Settings } from "lucide-react";
+import { Search, Settings, Zap } from "lucide-react";
 import { useSearch } from "../../hooks/use-search";
 
 const formSchema = z.object({
@@ -25,6 +26,7 @@ const formSchema = z.object({
   maxResults: z.number().default(10),
   searchDepth: z.string().default("standard"),
   language: z.string().default("en"),
+  enableInDepthSearch: z.boolean().default(false),
 });
 
 const platformOptions = [
@@ -37,11 +39,12 @@ const platformOptions = [
 ];
 
 interface BrandOpportunityFormProps {
-  onSubmit: (data: any) => void;
+  onSearch: (data: any) => Promise<void>;
   isLoading: boolean;
+  activeTab?: string;
 }
 
-export default function BrandOpportunityForm({ onSubmit, isLoading }: BrandOpportunityFormProps) {
+export default function BrandOpportunityForm({ onSearch, isLoading, activeTab }: BrandOpportunityFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,11 +59,12 @@ export default function BrandOpportunityForm({ onSubmit, isLoading }: BrandOppor
       maxResults: 10,
       searchDepth: "standard",
       language: "en",
+      enableInDepthSearch: false,
     },
   });
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    onSubmit(values);
+    onSearch(values);
   };
 
   return (
@@ -328,6 +332,31 @@ export default function BrandOpportunityForm({ onSubmit, isLoading }: BrandOppor
                     )}
                   />
                 </div>
+                
+                {/* Enable In-Depth Search Feature */}
+                <FormField
+                  control={form.control}
+                  name="enableInDepthSearch"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base flex items-center">
+                          <Zap className="mr-2 h-4 w-4 text-orange-500" />
+                          Enable In-Depth Search
+                        </FormLabel>
+                        <FormDescription>
+                          Trigger deeper crawling with broader keyword expansion for more comprehensive results
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </TabsContent>
             </Tabs>
 

@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Heart } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ExternalLink, Heart, Eye, Share2, ArrowUp, MessageSquare, ThumbsUp, Repeat2 } from "lucide-react";
 
 interface SearchResultsProps {
   results: any[];
@@ -43,14 +45,141 @@ export default function SearchResults({ results, type, totalResults, query }: Se
                   </p>
                 )}
                 
+                {/* Platform-specific stats */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    {result.engagement && (
-                      <span className="flex items-center space-x-1">
-                        <Heart className="h-3 w-3" />
-                        <span>{result.engagement}</span>
-                      </span>
+                    {/* Platform-specific metrics */}
+                    {result.platform === 'Reddit' && (
+                      <>
+                        {result.upvotes && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <ArrowUp className="h-3 w-3" />
+                                <span>{result.upvotes}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Reddit Upvotes</TooltipContent>
+                          </Tooltip>
+                        )}
+                        {result.comments && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <MessageSquare className="h-3 w-3" />
+                                <span>{result.comments}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Reddit Comments</TooltipContent>
+                          </Tooltip>
+                        )}
+                      </>
                     )}
+                    {result.platform === 'Quora' && (
+                      <>
+                        {result.views && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <Eye className="h-3 w-3" />
+                                <span>{result.views}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Quora Views</TooltipContent>
+                          </Tooltip>
+                        )}
+                        {result.upvotes && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <ThumbsUp className="h-3 w-3" />
+                                <span>{result.upvotes}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Quora Upvotes</TooltipContent>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
+                    {result.platform === 'Twitter/X' && (
+                      <>
+                        {result.likes && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <Heart className="h-3 w-3" />
+                                <span>{result.likes}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Twitter Likes</TooltipContent>
+                          </Tooltip>
+                        )}
+                        {result.retweets && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <Repeat2 className="h-3 w-3" />
+                                <span>{result.retweets}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Twitter Retweets</TooltipContent>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
+                    {result.platform === 'Facebook' && (
+                      <>
+                        {result.likes && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <ThumbsUp className="h-3 w-3" />
+                                <span>{result.likes}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Facebook Likes</TooltipContent>
+                          </Tooltip>
+                        )}
+                        {result.shares && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <Share2 className="h-3 w-3" />
+                                <span>{result.shares}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Facebook Shares</TooltipContent>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
+                    {result.platform === 'LinkedIn' && (
+                      <>
+                        {result.likes && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <ThumbsUp className="h-3 w-3" />
+                                <span>{result.likes}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>LinkedIn Likes</TooltipContent>
+                          </Tooltip>
+                        )}
+                        {result.shares && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1">
+                                <Share2 className="h-3 w-3" />
+                                <span>{result.shares}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>LinkedIn Reshares</TooltipContent>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
+                    
                     {result.sentiment && (
                       <Badge variant="outline" className="text-xs">
                         {result.sentiment}

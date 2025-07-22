@@ -408,7 +408,7 @@ Generate only the final reply text that would be posted.`;
           const response = await fetch('https://google.serper.dev/search', {
             method: 'POST',
             headers: {
-              'X-API-KEY': SERPER_API_KEY,
+              'X-API-KEY': SERPER_API_KEY!,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({

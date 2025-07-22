@@ -83,6 +83,11 @@ export const insertGeneratedReplySchema = createInsertSchema(generatedReplies).o
   createdAt: true,
 });
 
+export const insertFAQSchema = createInsertSchema(faqs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertFaqSchema = createInsertSchema(faqs).omit({
   id: true,
   createdAt: true,

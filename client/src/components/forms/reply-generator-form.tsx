@@ -22,7 +22,7 @@ const formSchema = z.object({
   aiProvider: z.string().default("openai"),
   model: z.string().default("gpt-4o"),
   creativity: z.array(z.number()).default([0.7]),
-  customApiKey: z.string().optional(),
+
 });
 
 export default function ReplyGeneratorForm() {
@@ -40,14 +40,30 @@ export default function ReplyGeneratorForm() {
       aiProvider: "openai",
       model: "gpt-4o",
       creativity: [0.7],
-      customApiKey: "",
+
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    // Get custom API keys from localStorage if available
+    const customKeys = localStorage.getItem('customApiKeys');
+    let customApiKey = '';
+    
+    if (customKeys) {
+      try {
+        const keys = JSON.parse(customKeys);
+        if (keys.useCustomKeys && keys.openaiApiKey) {
+          customApiKey = keys.openaiApiKey;
+        }
+      } catch (error) {
+        console.error('Error parsing custom API keys:', error);
+      }
+    }
+    
     const submitData = {
       ...values,
       creativity: values.creativity[0].toString(),
+      customApiKey: customApiKey,
     };
     generateReply(submitData);
   };
@@ -257,22 +273,7 @@ export default function ReplyGeneratorForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="customApiKey"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>API Key (Optional)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="password" 
-                      placeholder="Enter your API key or leave empty for default" 
-                      {...field} 
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+
 
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading} className="flex items-center space-x-2">

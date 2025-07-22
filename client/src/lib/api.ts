@@ -46,4 +46,16 @@ export const api = {
     const response = await apiRequest('GET', url);
     return response.json();
   },
+
+  // Reply Feedback
+  submitReplyFeedback: async (replyId: number, feedback: 'like' | 'dislike') => {
+    const response = await apiRequest('POST', `/api/replies/${replyId}/feedback`, { feedback });
+    return response.json();
+  },
+
+  // FAQ Generation
+  generateFAQ: async (data: any) => {
+    const response = await apiRequest('POST', '/api/generate-faq', data);
+    return response.json();
+  },
 };

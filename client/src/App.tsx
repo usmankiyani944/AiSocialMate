@@ -8,68 +8,12 @@ import { Menu, X, Search, MessageSquare, Zap, Bell, HelpCircle, Settings } from 
 import { useState } from "react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
-
-// Create placeholder components for the new sections
-function ThreadDiscovery() {
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Thread Discovery</h1>
-        <p className="text-gray-600">Coming soon - Advanced thread discovery features</p>
-      </div>
-    </div>
-  );
-}
-
-function AIReplyGenerator() {
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Reply Generator</h1>
-        <p className="text-gray-600">Coming soon - AI-powered reply generation</p>
-      </div>
-    </div>
-  );
-}
-
-function RescanAlerts() {
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Rescan Alerts</h1>
-        <p className="text-gray-600">Coming soon - Automated alert management</p>
-      </div>
-    </div>
-  );
-}
-
-function FAQGeneratorPage() {
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">FAQ Generator</h1>
-        <p className="text-gray-600">Generate comprehensive FAQ sections based on real social media discussions and questions.</p>
-      </div>
-      <div className="text-center py-12">
-        <p className="text-gray-500">FAQ Generator component will be loaded here</p>
-      </div>
-    </div>
-  );
-}
-
-function APISettingsPage() {
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">API Settings</h1>
-        <p className="text-gray-600">Configure your custom API keys for enhanced functionality and higher usage limits.</p>
-      </div>
-      <div className="text-center py-12">
-        <p className="text-gray-500">API Settings component will be loaded here</p>
-      </div>
-    </div>
-  );
-}
+import BrandOpportunities from "@/components/sections/brand-opportunities";
+import ThreadDiscovery from "@/components/sections/thread-discovery";
+import AIReplyGenerator from "@/components/sections/ai-reply-generator";
+import RescanAlerts from "@/components/sections/rescan-alerts";
+import FAQGenerator from "@/components/sections/faq-generator";
+import APISettings from "@/components/sections/api-settings";
 
 function Navigation() {
   const [location] = useLocation();
@@ -166,12 +110,12 @@ function Router() {
       <Navigation />
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <Switch>
-          <Route path="/" component={Home} />
+          <Route path="/" component={BrandOpportunities} />
           <Route path="/thread-discovery" component={ThreadDiscovery} />
           <Route path="/ai-reply-generator" component={AIReplyGenerator} />
           <Route path="/rescan-alerts" component={RescanAlerts} />
-          <Route path="/faq-generator" component={FAQGeneratorPage} />
-          <Route path="/api-settings" component={APISettingsPage} />
+          <Route path="/faq-generator" component={FAQGenerator} />
+          <Route path="/api-settings" component={APISettings} />
           <Route component={NotFound} />
         </Switch>
       </div>

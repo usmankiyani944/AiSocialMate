@@ -19,7 +19,9 @@ const formSchema = z.object({
   maxResults: z.number().default(10),
   includeNegativeSentiment: z.boolean().default(false),
   emailNotifications: z.boolean().default(true),
-  webhookUrl: z.string().optional(),
+  email: z.string().email("Please enter a valid email address").optional().or(z.literal("")),
+  webhookUrl: z.string().url("Please enter a valid webhook URL").optional().or(z.literal("")),
+  reportUrl: z.string().url("Please enter a valid report URL").optional().or(z.literal("")),
 });
 
 interface AlertFormProps {
@@ -40,7 +42,9 @@ export default function AlertForm({ onClose }: AlertFormProps) {
       maxResults: 10,
       includeNegativeSentiment: false,
       emailNotifications: true,
+      email: "",
       webhookUrl: "",
+      reportUrl: "",
     },
   });
 
@@ -273,6 +277,24 @@ export default function AlertForm({ onClose }: AlertFormProps) {
                   </FormItem>
                 )}
               />
+
+              {form.watch("emailNotifications") && (
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="notifications@yourdomain.com" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Email address to receive alert notifications
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             <FormField
@@ -290,6 +312,26 @@ export default function AlertForm({ onClose }: AlertFormProps) {
                   </FormControl>
                   <FormDescription>
                     Receive alerts via webhook
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reportUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Report URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="url" 
+                      placeholder="https://your-reports-dashboard.com" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    URL where detailed reports will be published
                   </FormDescription>
                 </FormItem>
               )}
