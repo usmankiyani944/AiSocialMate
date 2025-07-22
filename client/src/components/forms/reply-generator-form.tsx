@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,9 +40,24 @@ export default function ReplyGeneratorForm() {
       aiProvider: "openai",
       model: "gpt-4o",
       creativity: [0.7],
-
     },
   });
+
+  // Issue #2 fix - Auto-fill thread URL from query params
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const threadUrl = urlParams.get('threadUrl');
+    const title = urlParams.get('title');
+    
+    if (threadUrl) {
+      form.setValue('threadUrl', decodeURIComponent(threadUrl));
+    }
+    
+    // Clear URL params after auto-filling to clean up the URL
+    if (threadUrl || title) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [form]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     // Get custom API keys from localStorage if available

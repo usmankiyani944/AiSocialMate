@@ -82,17 +82,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const platformResults = await Promise.all(searchPromises);
       
-      // Flatten and format results
-      const formattedResults = platformResults.flatMap(pr => 
-        pr.results.map((result: any) => ({
-          title: result.title,
-          snippet: result.snippet,
-          url: result.link,
-          platform: pr.platform,
-          displayLink: result.displayLink,
-          position: result.position
-        }))
-      );
+      // Issue #4 fix - Add GPT-4o sentiment analysis for brand opportunities
+      const formattedResults = [];
+      for (const pr of platformResults) {
+        for (const result of pr.results) {
+          let detectedSentiment = 'neutral';
+          
+          // Use GPT-4o for advanced sentiment analysis when sentiment filtering is requested
+          if (sentiment && sentiment !== 'all') {
+            try {
+              const sentimentResponse = await openai.chat.completions.create({
+                model: 'gpt-4o',
+                messages: [
+                  {
+                    role: 'system',
+                    content: 'You are an expert sentiment analyzer. Analyze the text and return only one word: "positive", "negative", or "neutral". Consider context, negations, sarcasm, and implicit sentiment carefully.'
+                  },
+                  {
+                    role: 'user',
+                    content: `Analyze sentiment of: "${result.title} ${result.snippet || ''}"`
+                  }
+                ],
+                temperature: 0.1,
+                max_tokens: 10
+              });
+              
+              const analyzedSentiment = sentimentResponse.choices[0].message.content?.toLowerCase().trim();
+              if (['positive', 'negative', 'neutral'].includes(analyzedSentiment || '')) {
+                detectedSentiment = analyzedSentiment || 'neutral';
+              }
+            } catch (error) {
+              console.log('Sentiment analysis failed, using neutral');
+            }
+          }
+
+          // Only include results matching sentiment filter
+          if (sentiment === 'all' || detectedSentiment === sentiment) {
+            formattedResults.push({
+              title: result.title,
+              snippet: result.snippet,
+              url: result.link,
+              platform: pr.platform,
+              displayLink: result.displayLink,
+              position: result.position,
+              sentiment: detectedSentiment
+            });
+          }
+        }
+      }
 
       // Store search results
       await storage.createSearchResult({
@@ -171,17 +208,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const platformResults = await Promise.all(searchPromises);
       
-      // Format results
-      const formattedResults = platformResults.flatMap(pr => 
-        pr.results.map((result: any) => ({
-          title: result.title,
-          snippet: result.snippet,
-          url: result.link,
-          platform: pr.platform,
-          displayLink: result.displayLink,
-          position: result.position
-        }))
-      );
+      // Issue #4 fix - Add GPT-4o sentiment analysis for thread discovery
+      const formattedResults = [];
+      for (const pr of platformResults) {
+        for (const result of pr.results) {
+          let detectedSentiment = 'neutral';
+          
+          // Use GPT-4o for advanced sentiment analysis
+          try {
+            const sentimentResponse = await openai.chat.completions.create({
+              model: 'gpt-4o',
+              messages: [
+                {
+                  role: 'system',
+                  content: 'You are an expert sentiment analyzer. Analyze the text and return only one word: "positive", "negative", or "neutral". Consider context, negations, sarcasm, and implicit sentiment carefully.'
+                },
+                {
+                  role: 'user',
+                  content: `Analyze sentiment of: "${result.title} ${result.snippet || ''}"`
+                }
+              ],
+              temperature: 0.1,
+              max_tokens: 10
+            });
+            
+            const analyzedSentiment = sentimentResponse.choices[0].message.content?.toLowerCase().trim();
+            if (['positive', 'negative', 'neutral'].includes(analyzedSentiment || '')) {
+              detectedSentiment = analyzedSentiment || 'neutral';
+            }
+          } catch (error) {
+            console.log('Sentiment analysis failed, using neutral');
+          }
+
+          formattedResults.push({
+            title: result.title,
+            snippet: result.snippet,
+            url: result.link,
+            platform: pr.platform,
+            displayLink: result.displayLink,
+            position: result.position,
+            sentiment: detectedSentiment
+          });
+        }
+      }
 
       // Store search results
       await storage.createSearchResult({
