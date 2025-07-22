@@ -18,8 +18,8 @@ export default function ThreadResults({ results, totalResults, query }: ThreadRe
   }
 
   const handleGenerateReply = (threadUrl: string, threadTitle: string) => {
-    // Issue #3 & #4 fix - Navigate to AI Reply Generator with pre-filled URL
-    setLocation(`/ai-replies?threadUrl=${encodeURIComponent(threadUrl)}&title=${encodeURIComponent(threadTitle)}`);
+    // Issue #2 fix - Navigate to correct AI Reply Generator route
+    setLocation(`/ai-reply-generator?threadUrl=${encodeURIComponent(threadUrl)}&title=${encodeURIComponent(threadTitle)}`);
   };
 
   return (

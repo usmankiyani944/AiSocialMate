@@ -45,29 +45,29 @@ export default function SearchResults({ results, type, totalResults, query }: Se
                   </p>
                 )}
                 
-                {/* Enhanced Platform-specific stats - Issue #2 fix */}
+                {/* Enhanced Platform-specific stats - Issue #1 fix */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    {/* Enhanced Platform-specific metrics with better visibility */}
+                    {/* Show actual statistics from platform data */}
                     {result.platform === 'Reddit' && (
                       <>
-                        {result.upvotes && (
+                        {(result.votes || result.upvotes) && (
                           <Tooltip>
                             <TooltipTrigger>
-                              <span className="flex items-center space-x-1">
-                                <ArrowUp className="h-3 w-3" />
-                                <span>{result.upvotes}</span>
+                              <span className="flex items-center space-x-1 bg-orange-100 px-2 py-1 rounded">
+                                <ArrowUp className="h-3 w-3 text-orange-600" />
+                                <span className="font-medium text-orange-700">{result.votes || result.upvotes}</span>
                               </span>
                             </TooltipTrigger>
-                            <TooltipContent>Reddit Upvotes</TooltipContent>
+                            <TooltipContent>Reddit Votes</TooltipContent>
                           </Tooltip>
                         )}
                         {result.comments && (
                           <Tooltip>
                             <TooltipTrigger>
-                              <span className="flex items-center space-x-1">
-                                <MessageSquare className="h-3 w-3" />
-                                <span>{result.comments}</span>
+                              <span className="flex items-center space-x-1 bg-blue-100 px-2 py-1 rounded">
+                                <MessageSquare className="h-3 w-3 text-blue-600" />
+                                <span className="font-medium text-blue-700">{result.comments}</span>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>Reddit Comments</TooltipContent>
@@ -80,35 +80,35 @@ export default function SearchResults({ results, type, totalResults, query }: Se
                         {result.views && (
                           <Tooltip>
                             <TooltipTrigger>
-                              <span className="flex items-center space-x-1">
-                                <Eye className="h-3 w-3" />
-                                <span>{result.views}</span>
+                              <span className="flex items-center space-x-1 bg-green-100 px-2 py-1 rounded">
+                                <Eye className="h-3 w-3 text-green-600" />
+                                <span className="font-medium text-green-700">{result.views}</span>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>Quora Views</TooltipContent>
                           </Tooltip>
                         )}
-                        {result.upvotes && (
+                        {(result.votes || result.upvotes) && (
                           <Tooltip>
                             <TooltipTrigger>
-                              <span className="flex items-center space-x-1">
-                                <ThumbsUp className="h-3 w-3" />
-                                <span>{result.upvotes}</span>
+                              <span className="flex items-center space-x-1 bg-purple-100 px-2 py-1 rounded">
+                                <ThumbsUp className="h-3 w-3 text-purple-600" />
+                                <span className="font-medium text-purple-700">{result.votes || result.upvotes}</span>
                               </span>
                             </TooltipTrigger>
-                            <TooltipContent>Quora Upvotes</TooltipContent>
+                            <TooltipContent>Quora Votes</TooltipContent>
                           </Tooltip>
                         )}
                       </>
                     )}
-                    {result.platform === 'Twitter/X' && (
+                    {(result.platform === 'Twitter/X' || result.platform === 'Twitter') && (
                       <>
                         {result.likes && (
                           <Tooltip>
                             <TooltipTrigger>
-                              <span className="flex items-center space-x-1">
-                                <Heart className="h-3 w-3" />
-                                <span>{result.likes}</span>
+                              <span className="flex items-center space-x-1 bg-red-100 px-2 py-1 rounded">
+                                <Heart className="h-3 w-3 text-red-600" />
+                                <span className="font-medium text-red-700">{result.likes}</span>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>Twitter Likes</TooltipContent>
@@ -117,12 +117,23 @@ export default function SearchResults({ results, type, totalResults, query }: Se
                         {result.retweets && (
                           <Tooltip>
                             <TooltipTrigger>
-                              <span className="flex items-center space-x-1">
-                                <Repeat2 className="h-3 w-3" />
-                                <span>{result.retweets}</span>
+                              <span className="flex items-center space-x-1 bg-cyan-100 px-2 py-1 rounded">
+                                <Repeat2 className="h-3 w-3 text-cyan-600" />
+                                <span className="font-medium text-cyan-700">{result.retweets}</span>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>Twitter Retweets</TooltipContent>
+                          </Tooltip>
+                        )}
+                        {result.shares && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="flex items-center space-x-1 bg-teal-100 px-2 py-1 rounded">
+                                <Share2 className="h-3 w-3 text-teal-600" />
+                                <span className="font-medium text-teal-700">{result.shares}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Twitter Shares</TooltipContent>
                           </Tooltip>
                         )}
                       </>

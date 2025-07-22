@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BrandOpportunityForm from "@/components/forms/brand-opportunity-form";
 import SearchResults from "@/components/results/search-results";
 import { useSearch } from "../../hooks/use-search";
@@ -22,46 +21,13 @@ export default function BrandOpportunities() {
         <p className="text-gray-600">Find mentions of competitors without your brand to discover new opportunities.</p>
       </div>
 
-      <Tabs defaultValue="basic" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="basic">Basic</TabsTrigger>
-          <TabsTrigger value="platforms">Platforms</TabsTrigger>
-          <TabsTrigger value="filters">Filters</TabsTrigger>
-          <TabsTrigger value="advanced">Advanced</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="basic" className="space-y-6">
-          <BrandOpportunityForm 
-            onSearch={handleSearch}
-            isLoading={isLoading}
-            activeTab="basic"
-          />
-        </TabsContent>
-
-        <TabsContent value="platforms" className="space-y-6">
-          <BrandOpportunityForm 
-            onSearch={handleSearch}
-            isLoading={isLoading}
-            activeTab="platforms"
-          />
-        </TabsContent>
-
-        <TabsContent value="filters" className="space-y-6">
-          <BrandOpportunityForm 
-            onSearch={handleSearch}
-            isLoading={isLoading}
-            activeTab="filters"
-          />
-        </TabsContent>
-
-        <TabsContent value="advanced" className="space-y-6">
-          <BrandOpportunityForm 
-            onSearch={handleSearch}
-            isLoading={isLoading}
-            activeTab="advanced"
-          />
-        </TabsContent>
-      </Tabs>
+      {/* Issue #5 fix - Single form without tabs */}
+      <div className="space-y-6">
+        <BrandOpportunityForm 
+          onSearch={handleSearch}
+          isLoading={isLoading}
+        />
+      </div>
 
       {searchResults && (
         <SearchResults 
